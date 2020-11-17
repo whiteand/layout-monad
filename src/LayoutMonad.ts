@@ -23,7 +23,7 @@ export class LayoutMonad<Layout extends string, T> {
   public constructor(lazyDict: LayoutDict<Layout, Lazy<T>>, layouts?: Layout[]) {
     this.layouts = layouts || (Object.keys(lazyDict) as Layout[])
     this.lazyDict = lazyDict
-    this.isCalculated = buildDict(this.layouts, () => false)
+    this.isCalculated = Object.create(null)
   }
 
   private buildDict<X>(f: (layout: Layout) => X): LayoutDict<Layout, X> {
@@ -55,7 +55,7 @@ export class LayoutMonad<Layout extends string, T> {
     )
   }
   public getValue(layout: Layout): T {
-    if (this.isCalculated[layout]) {
+    if (this.isCalculated[layout] === true) {
       return this.lazyDict[layout] as T
     }
     const lazy = this.lazyDict[layout] as Lazy<T>
