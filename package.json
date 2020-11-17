@@ -1,7 +1,7 @@
 {
-  "name": "template-typescript-package",
+  "name": "layout-monad",
   "version": "0.0.0-development",
-  "description": "A boilerplate repo for publishing typescript packages to npm",
+  "description": "Useful monad for lazy layout computations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -15,22 +15,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/beeman/template-typescript-package.git"
+    "url": "https://github.com/whiteand/layout-monad.git"
   },
   "keywords": [
-    "TypeScript",
-    "Package",
-    "Starter"
+    "Monad",
+    "responsive",
+    "layout"
   ],
   "author": {
-    "name": "Bram Borggreve",
-    "email": "borggreve@gmail.com"
+    "name": "Andrew Beletskiy",
+    "email": "andrewbeletskiy@gmail.com"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/beeman/template-typescript-package/issues"
+    "url": "https://github.com/whiteand/layout-monad/issues"
   },
-  "homepage": "https://github.com/beeman/template-typescript-package#readme",
+  "homepage": "https://github.com/whiteand/layout-monad#readme",
   "husky": {
     "hooks": {
       "pre-commit": "yarn lint && npm test",
