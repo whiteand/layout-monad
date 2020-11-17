@@ -5,7 +5,7 @@ type LayoutDict<Layout extends string, T> = {
 }
 
 function buildDict<Layout extends string, X>(
-  layouts: Layout[],
+  layouts: readonly Layout[],
   f: (layout: Layout, layoutIndex: number) => X,
 ): LayoutDict<Layout, X> {
   const dict: any = Object.create(null)
@@ -18,9 +18,9 @@ function buildDict<Layout extends string, X>(
 
 export class LayoutMonad<Layout extends string, T> {
   private readonly lazyDict: LayoutDict<Layout, Lazy<T> | T>
-  private readonly layouts: Layout[]
+  private readonly layouts: readonly Layout[]
   private readonly isCalculated: LayoutDict<Layout, boolean>
-  public constructor(lazyDict: LayoutDict<Layout, Lazy<T>>, layouts?: Layout[]) {
+  public constructor(lazyDict: LayoutDict<Layout, Lazy<T>>, layouts?: readonly Layout[]) {
     this.layouts = layouts || (Object.keys(lazyDict) as Layout[])
     this.lazyDict = lazyDict
     this.isCalculated = Object.create(null)
@@ -30,18 +30,15 @@ export class LayoutMonad<Layout extends string, T> {
     return buildDict(this.layouts, f)
   }
 
-  public static of<Layout extends string, T>(layouts: Layout[], value: T): LayoutMonad<Layout, T> {
-    return new LayoutMonad<Layout, T>(
+  public static of<LT extends string, T>(layouts: readonly LT[], value: T): LayoutMonad<LT, T> {
+    return new LayoutMonad<LT, T>(
       buildDict(layouts, () => () => value),
       layouts,
     )
   }
 
-  public static fromLayouts<Layout extends string, T>(
-    layouts: Layout[],
-    f: (layout: Layout) => T,
-  ): LayoutMonad<Layout, T> {
-    return new LayoutMonad<Layout, T>(
+  public static fromLayouts<LT extends string, T>(layouts: readonly LT[], f: (layout: LT) => T): LayoutMonad<LT, T> {
+    return new LayoutMonad<LT, T>(
       buildDict(layouts, (layout) => () => f(layout)),
       layouts,
     )
@@ -116,8 +113,8 @@ export class LayoutMonad<Layout extends string, T> {
 
   public mapLayouts<NewLayout extends string>(
     getNewLayoutOrNewLayoutDict:
-      | ((oldLayout: Layout) => NewLayout | NewLayout[])
-      | Record<Layout, NewLayout | NewLayout[]>,
+      | ((oldLayout: Layout) => NewLayout | readonly NewLayout[])
+      | Record<Layout, NewLayout | readonly NewLayout[]>,
   ): LayoutMonad<NewLayout, T> {
     const newLayouts: NewLayout[] = []
     const oldFromNew: any = Object.create(null)
@@ -130,20 +127,20 @@ export class LayoutMonad<Layout extends string, T> {
       const oldLayout = this.layouts[i]
       const newLayout = getNewLayout(oldLayout)
 
-      if (Array.isArray(newLayout)) {
-        for (let i = 0; i < newLayout.length; i++) {
-          const newLayoutItem = newLayout[i]
-          if (typeof oldFromNew[newLayoutItem] === 'undefined') {
-            oldFromNew[newLayoutItem] = oldLayout
-            newLayouts.push(newLayoutItem)
-          }
+      if (typeof newLayout === 'string') {
+        if (typeof oldFromNew[newLayout] === 'undefined') {
+          oldFromNew[newLayout] = oldLayout
+          newLayouts.push(newLayout)
         }
         continue
       }
 
-      if (typeof oldFromNew[newLayout] === 'undefined') {
-        oldFromNew[newLayout] = oldLayout
-        newLayouts.push(newLayout)
+      for (let i = 0; i < newLayout.length; i++) {
+        const newLayoutItem = newLayout[i]
+        if (typeof oldFromNew[newLayoutItem] === 'undefined') {
+          oldFromNew[newLayoutItem] = oldLayout
+          newLayouts.push(newLayoutItem)
+        }
       }
     }
 
